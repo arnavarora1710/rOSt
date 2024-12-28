@@ -1,0 +1,20 @@
+#+title: rOSt Notes
+#+description: Notes about Rust or OS things I did not know previously
+#+author: Arnav Arora
+
+* Starting with an Executable
+- We want to get rid of STL because it queries the OS a lot.
+  - Want an executable operating on bare metal
+- Bad news: this doesn't compile (without STL...)
+#+begin_src rust
+fn main() {
+    println!("Hello World!");
+}
+#+end_src
+
+#+RESULTS:
+: Hello World!
+
+- We use the #![no_std] attribute to disable the STL.
+  - As soon as we do that, we get rid of a panic handler
+    - Stores and reports key information to the compiler when a panic occurs
