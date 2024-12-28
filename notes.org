@@ -18,3 +18,35 @@ fn main() {
 - We use the #![no_std] attribute to disable the STL.
   - As soon as we do that, we get rid of a panic handler
     - Stores and reports key information to the compiler when a panic occurs
+
+- Need a panic handler implementation
+#+begin_src rust
+use core::panic::PanicInfo;
+
+#[panic_handler]
+fn panic(_info: &PanicInfo) -> ! {
+    loop {}
+}
+#+end_src
+ - PanicInfo contains file and line number with optional panic message.
+   - This function doesn't return : so mark as [[https://doc.rust-lang.org/1.30.0/book/first-edition/functions.html#diverging-functions]["diverging"]] type with [[https://doc.rust-lang.org/nightly/std/primitive.never.html][never type]] "!"
+
+ - PLs have a "runtime" which is called before main for housekeeping stuff
+   - For a Rust binary linking with STL, starts with a C runtime lib called /crt0/ ("C runtime zero")
+   - This invokes the entry point for the Rust runtime marked by the "start" *language item*
+     - Language items are special functions and types that are required internally by the compiler
+   - The rust runtime then calls the main function
+
+ - To make this binary freestanding, we overwrite the crt0 entry point labelled by _start.
+
+#+begin_src rust
+#[no_mangle]
+pub extern "C" fn _start() -> ! {
+    loop {}
+}
+#+end_src
+
+- No mangling is to keep _start's name the same
+  - It gets messed up by [[https://en.wikipedia.org/wiki/Name_mangling?useskin=vector][name mangling]] in compilers
+
+- We are looping endlessly here because imagine a standard Rust binary: once the program is done executing, you don't need to return; you call the exit() syscall as there's nothing left to do!
